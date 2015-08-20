@@ -95,6 +95,12 @@ pub fn matrix_over_numpy(data: *const f64, raw_ndim: i32, raw_dims: *const i32, 
        ptr : unsafe {mem::transmute(data)}})
 }
 
+pub fn forget_matrix_data(mut m: Matrix<f64>) {
+    // Causes num_cells to be 0, hence allocation to be skipped.
+    m.rows = 0;
+    // Because m was moved here, we drop it now.
+}
+
 /// Static functions for creating  a matrix
 impl<T:MagmaBase> Matrix<T> {
 
