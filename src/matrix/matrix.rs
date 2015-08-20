@@ -85,30 +85,24 @@ pub type MatrixC64 = Matrix<Complex64>;
 
 
 use std::slice;
-impl Matrix<f64> {
+pub fn matrix_over_numpy(data: *const f64, raw_ndim: i32, raw_dims: *const i32, byte_strides: *const i32) -> Box<Matrix<f64>>{
+   let ndim = raw_ndim as usize;
+   let dimslc = unsafe {slice::from_raw_parts(raw_dims, ndim)};
 
-    pub  fn matrix_over_numpy(data: *const f64, raw_ndim: i32, raw_dims: *const i32, byte_strides: *const i32) -> Box<Matrix<f64>>{
-       let ndim = raw_ndim as usize;
-       let dimslc = unsafe {slice::from_raw_parts(raw_dims, ndim)};
-
-       Box::new(Matrix {
-           rows : dimslc[1] as usize,
-           cols : dimslc[0] as usize,
-           ptr : unsafe {mem::transmute(data)}})
-    }
-
-
-
+   Box::new(Matrix {
+       rows : dimslc[1] as usize,
+       cols : dimslc[0] as usize,
+       ptr : unsafe {mem::transmute(data)}})
 }
-
+ 
 /// Static functions for creating  a matrix
 impl<T:MagmaBase> Matrix<T> {
 
 #[doc = "Constructs a new matrix of given size (uninitialized).
 
-# Remarks 
+# Remarks
 
-The contents of the matrix are not initialized. Hence, 
+The contents of the matrix are not initialized. Hence,
 it doesn't make sense to use this function liberally.
 Still the function is internally useful since
 different constructor functions need to initialize
