@@ -84,7 +84,22 @@ pub type MatrixC32 = Matrix<Complex32>;
 pub type MatrixC64 = Matrix<Complex64>;
 
 
+use std::slice;
+impl Matrix<f64> {
 
+    pub  fn matrix_over_numpy(data: *const f64, raw_ndim: i32, raw_dims: *const i32, byte_strides: *const i32) -> Box<Matrix<f64>>{
+       let ndim = raw_ndim as usize;
+       let dimslc = unsafe {slice::from_raw_parts(raw_dims, ndim)};
+
+       Box::new(Matrix {
+           rows : dimslc[1] as usize,
+           cols : dimslc[0] as usize,
+           ptr : unsafe {mem::transmute(data)}})
+    }
+
+
+
+}
 
 /// Static functions for creating  a matrix
 impl<T:MagmaBase> Matrix<T> {
