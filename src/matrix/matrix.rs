@@ -20,8 +20,8 @@ use num::complex::{Complex32, Complex64};
 // local imports
 
 use discrete::{mod_n};
-use algebra::structure::{MagmaBase, 
-    CommutativeMonoidAddPartial, 
+use algebra::structure::{MagmaBase,
+    CommutativeMonoidAddPartial,
     CommutativeMonoidMulPartial,
     QuasiGroupAddPartial,
     CommutativeGroupAddPartial,
@@ -33,7 +33,7 @@ use matrix::traits::{Shape, NumberMatrix,
     Strided,
     StridedNumberMatrix,
     StridedFloatMatrix,
-    Introspection, 
+    Introspection,
     MatrixBuffer,
     Search};
 
@@ -53,7 +53,7 @@ pub struct Matrix<T:MagmaBase> {
     /// Number of rows in the matrix
     rows : usize,
     /// Number of columns in the matrix
-    cols : usize, 
+    cols : usize,
     /// The pointer to raw data array of the matrix
     ptr : *mut T
 }
@@ -90,11 +90,11 @@ pub fn matrix_over_numpy(data: *const f64, raw_ndim: i32, raw_dims: *const i32, 
    let dimslc = unsafe {slice::from_raw_parts(raw_dims, ndim)};
 
    Box::new(Matrix {
-       rows : dimslc[1] as usize,
-       cols : dimslc[0] as usize,
+       rows : dimslc[0] as usize,
+       cols : dimslc[1] as usize,
        ptr : unsafe {mem::transmute(data)}})
 }
- 
+
 /// Static functions for creating  a matrix
 impl<T:MagmaBase> Matrix<T> {
 
@@ -116,7 +116,7 @@ the matrix differently.
         if capacity == 0{
             // We do not allocate any memory for the buffer.
             // We leave it as a NULL pointer.
-            return Matrix { rows : rows, 
+            return Matrix { rows : rows,
                 cols : cols,
                 ptr : ptr::null_mut()
             };
@@ -126,8 +126,8 @@ the matrix differently.
             allocate(bytes, mem::align_of::<T>())
         };
         let ptr = raw as *mut T;
-        Matrix { rows : rows, 
-                cols : cols, 
+        Matrix { rows : rows,
+                cols : cols,
                 ptr : ptr}
     }
 
@@ -148,7 +148,7 @@ impl<T:CommutativeMonoidAddPartial> Matrix<T> {
                     let p  = ptr.offset(offset as isize);
                     *p = z;
                 }
-            } 
+            }
         }
         m
     }
@@ -214,7 +214,7 @@ impl<T: Debug + Clone + Copy + PartialEq> Matrix<T> {
 
     #[doc = "Constructs a matrix from a slice of data reading data in row wise order.
 
-# Remarks 
+# Remarks
 
 In source code, when we are constructing matrices from slices, a
 slice looks easier to read in row wise order. Thus, this
@@ -290,9 +290,9 @@ by hand.
         mat
     }
 
-    /// Builds a matrix from an iterator reading numbers in a 
+    /// Builds a matrix from an iterator reading numbers in a
     /// row-wise order
-    pub fn from_iter_rw< A : Iterator<Item=T>>(rows: usize, cols : usize, 
+    pub fn from_iter_rw< A : Iterator<Item=T>>(rows: usize, cols : usize,
         iter: A) -> Matrix<T>{
         let m : Matrix<T> = Matrix::new(rows, cols);
         let ptr = m.ptr;
@@ -346,7 +346,7 @@ impl<T:CommutativeMonoidAddPartial+One> Matrix<T> {
                     let p  = ptr.offset(offset as isize);
                     *p = o;
                 }
-            } 
+            }
         }
         m
     }
@@ -444,7 +444,7 @@ impl<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> NumberMatrix<T> 
                 }
 
             }
-        } 
+        }
         true
     }
 
@@ -462,11 +462,11 @@ impl<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> NumberMatrix<T> 
                     }
                 }
             }
-        } 
+        }
         true
     }
 
-    /// Returns if the matrix is lower triangular 
+    /// Returns if the matrix is lower triangular
     fn is_lt(&self) -> bool {
         let z  : T = Zero::zero();
         let ptr = self.ptr;
@@ -478,11 +478,11 @@ impl<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> NumberMatrix<T> 
                     return false;
                 }
             }
-        } 
+        }
         true
     }
 
-    /// Returns if the matrix is upper triangular 
+    /// Returns if the matrix is upper triangular
     fn is_ut(&self) -> bool {
         let z  : T = Zero::zero();
         let ptr = self.ptr;
@@ -494,7 +494,7 @@ impl<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> NumberMatrix<T> 
                     return false;
                 }
             }
-        } 
+        }
         true
     }
 
@@ -540,7 +540,7 @@ impl<T> Introspection for Matrix<T> {
 /// Strided buffer
 impl<T:MagmaBase> Strided for Matrix<T> {
 
-    /// Returns the number of actual memory elements 
+    /// Returns the number of actual memory elements
     /// per column stored in the memory
     fn stride (&self)->usize {
         self.rows
@@ -559,7 +559,7 @@ impl<T:FieldPartial+Float> StridedFloatMatrix<T> for Matrix<T> {
 /// Buffer access
 impl<T:MagmaBase> MatrixBuffer<T> for Matrix<T> {
 
-    /// Returns an unsafe pointer to the matrix's 
+    /// Returns an unsafe pointer to the matrix's
     /// buffer.
     #[inline]
     fn as_ptr(&self)-> *const T{
@@ -577,14 +577,14 @@ impl<T:MagmaBase> MatrixBuffer<T> for Matrix<T> {
     #[inline]
     fn cell_to_offset(&self, r : usize,  c: usize)-> isize {
         (c * self.stride() + r) as isize
-    } 
+    }
 
 }
 
 /// Main methods of a matrix
 impl<T:MagmaBase> Matrix<T> {
 
-    /// Returns the capacity of the matrix 
+    /// Returns the capacity of the matrix
     /// i.e. the number of elements it can hold
     pub fn capacity(&self)-> usize {
         self.rows * self.cols
@@ -615,7 +615,7 @@ impl<T: Debug + Clone + Copy + PartialEq> Matrix<T> {
 
     /// Returns an iterator over a specific row of matrix
     pub fn row_iter(&self, r : isize) -> RowIterator<T>{
-        let r = mod_n(r, self.rows as isize);        
+        let r = mod_n(r, self.rows as isize);
         // Lets find the offset of the begging of the row
         let offset = self.cell_to_offset(r, 0);
         let iter : RowIterator<T> = RowIterator::new(self.cols,
@@ -625,7 +625,7 @@ impl<T: Debug + Clone + Copy + PartialEq> Matrix<T> {
 
     /// Returns an iterator over a specific column of the matrix
     pub fn col_iter(&self, c : isize) -> ColIterator<T>{
-        let c = mod_n(c, self.cols as isize);        
+        let c = mod_n(c, self.cols as isize);
         // Lets find the offset of the begging of the column
         let offset = self.cell_to_offset(0, c);
         let iter : ColIterator<T> = ColIterator::new(self.rows,
@@ -650,7 +650,7 @@ impl<T: Debug + Clone + Copy + PartialEq> Matrix<T> {
 /// Functions to construct new matrices out of a matrix and other conversions
 impl<T:CommutativeMonoidAddPartial+One> Matrix<T> {
 
-    // Repeats this matrix in both horizontal and vertical directions 
+    // Repeats this matrix in both horizontal and vertical directions
     pub fn repeat_matrix(&self, num_rows : usize, num_cols : usize) -> Matrix<T> {
         let rows = self.rows * num_rows;
         let cols = self.cols * num_cols;
@@ -684,9 +684,9 @@ impl<T:CommutativeMonoidAddPartial+One> Matrix<T> {
         for (i, e) in (0..m).zip(self.diagonal_iter()){
             unsafe{
                 *dst.offset(i as isize) = e;
-            } 
+            }
         }
-        result        
+        result
     }
 
     /// Extracts the primary diagonal from the matrix as a matrix of same size
@@ -699,9 +699,9 @@ impl<T:CommutativeMonoidAddPartial+One> Matrix<T> {
             let offset = self.cell_to_offset(i, i);
             unsafe{
                 *dst.offset(offset) = *src.offset(offset);
-            } 
+            }
         }
-        result        
+        result
     }
 
     /// Returns the upper triangular part of the matrix as a new matrix
@@ -875,7 +875,7 @@ impl<T:CommutativeGroupAddPartial> Matrix<T> {
 impl<T:MagmaBase> Matrix<T> {
 
     /// Appends one or more columns at the end of matrix
-    pub fn append_columns(&mut self, 
+    pub fn append_columns(&mut self,
         other : &Matrix<T>
         )-> &mut Matrix<T> {
         let cols = self.cols;
@@ -884,7 +884,7 @@ impl<T:MagmaBase> Matrix<T> {
 
     /// Prepends one or more columns at the beginning of matrix
     pub fn prepend_columns(&mut self,
-        other : &Matrix<T> 
+        other : &Matrix<T>
         )-> &mut Matrix<T> {
         self.insert_columns(0, other)
     }
@@ -892,7 +892,7 @@ impl<T:MagmaBase> Matrix<T> {
     /// Inserts columns at the specified location
     pub fn insert_columns(&mut self,
         index  : usize,
-        other : &Matrix<T> 
+        other : &Matrix<T>
         )-> &mut Matrix<T> {
         debug_assert_eq!(self.num_rows() , other.num_rows());
         debug_assert!(other.num_cols() > 0);
@@ -922,7 +922,7 @@ impl<T:MagmaBase> Matrix<T> {
 
 
     /// Appends one or more rows at the bottom of matrix
-    pub fn append_rows(&mut self, 
+    pub fn append_rows(&mut self,
         other : &Matrix<T>
         )-> &mut Matrix<T> {
         let rows = self.rows;
@@ -931,7 +931,7 @@ impl<T:MagmaBase> Matrix<T> {
 
     /// Prepends one or more rows at the top of matrix
     pub fn prepend_rows(&mut self,
-        other : &Matrix<T> 
+        other : &Matrix<T>
         )-> &mut Matrix<T> {
         self.insert_rows(0, other)
     }
@@ -939,7 +939,7 @@ impl<T:MagmaBase> Matrix<T> {
     /// Inserts rows at the specified location
     pub fn insert_rows(&mut self,
         index  : usize,
-        other : &Matrix<T> 
+        other : &Matrix<T>
         )-> &mut Matrix<T> {
         // Make sure that the dimensions are compatible.
         debug_assert_eq!(self.num_cols() , other.num_cols());
@@ -963,7 +963,7 @@ impl<T:MagmaBase> Matrix<T> {
             let dst_offset = self.cell_to_offset(i + index, 0);
             for j in 0..self.cols{
                 unsafe {
-                    *dst_ptr.offset(dst_offset + (j*dst_stride) as isize) = 
+                    *dst_ptr.offset(dst_offset + (j*dst_stride) as isize) =
                     *src_ptr.offset(src_offset + (j*src_stride) as isize);
                 }
             }
@@ -979,10 +979,10 @@ impl<T:MagmaBase> Matrix<T> {
 
     ## Notes
 
-    A simple reallocate cannot be used. When the 
+    A simple reallocate cannot be used. When the
     number of rows changes, the stride also changes.
     Thus, the matrix elements need to be moved around.
-    "] 
+    "]
     fn reallocate(&mut self, rows : usize, cols : usize){
         let old_capacity = self.rows * self.cols;
         let new_capacity = rows *  cols;
@@ -1092,7 +1092,7 @@ impl<T:MagmaBase> Matrix<T> {
                 debug_assert!(src_offset + ii < capacity);
                 debug_assert!(dst_offset + ii < capacity);
                 unsafe {
-                    *ptr.offset(dst_offset + ii) = 
+                    *ptr.offset(dst_offset + ii) =
                     *ptr.offset(src_offset + ii);
                 }
             }
@@ -1140,7 +1140,7 @@ impl<T:CommutativeMonoidAddPartial+PartialOrd> Matrix<T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)};
-                if s < v { 
+                if s < v {
                     v = s;
                     rr = r;
                     cc = c;
@@ -1164,7 +1164,7 @@ impl<T:CommutativeMonoidAddPartial+PartialOrd> Matrix<T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)};
-                if s > v { 
+                if s > v {
                     v = s;
                     rr = r;
                     cc = c;
@@ -1177,12 +1177,12 @@ impl<T:CommutativeMonoidAddPartial+PartialOrd> Matrix<T> {
     pub fn min_scalar_value(&self) -> T{
         let (v , _, _) = self.min_scalar();
         v
-    }    
+    }
     /// Returns the maximum scalar value
     pub fn max_scalar_value(&self) -> T{
         let (v , _, _) = self.max_scalar();
         v
-    }    
+    }
 }
 
 impl<T:MagmaBase+Signed+PartialOrd> Matrix<T> {
@@ -1201,7 +1201,7 @@ impl<T:MagmaBase+Signed+PartialOrd> Matrix<T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)}.abs();
-                if s < v { 
+                if s < v {
                     v = s;
                     rr = r;
                     cc = c;
@@ -1225,7 +1225,7 @@ impl<T:MagmaBase+Signed+PartialOrd> Matrix<T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)}.abs();
-                if s > v { 
+                if s > v {
                     v  = s;
                     rr = r;
                     cc = c;
@@ -1233,18 +1233,18 @@ impl<T:MagmaBase+Signed+PartialOrd> Matrix<T> {
             }
         }
         (v, rr, cc)
-    }    
+    }
 
     /// Returns the absolute minimum scalar value
     pub fn min_abs_scalar_value(&self) -> T{
         let (v , _, _) = self.min_abs_scalar();
         v
-    }    
+    }
     /// Returns the absolute maximum scalar value
     pub fn max_abs_scalar_value(&self) -> T{
         let (v , _, _) = self.max_abs_scalar();
         v
-    }    
+    }
 }
 
 /// These functions are available only for integer matrices
@@ -1258,7 +1258,7 @@ impl<T:MagmaBase + Signed> Matrix<T> {
         for c in 0..self.cols{
             for r in 0..self.rows{
                 let offset = self.cell_to_offset(r, c);
-                unsafe{ 
+                unsafe{
                     let v = *self.ptr.offset(offset);
                     if v != z && v != o {
                         return false;
@@ -1279,7 +1279,7 @@ impl<T:FieldPartial+Float> Matrix<T> {
         for c in 0..self.cols{
             for r in 0..self.rows{
                 let offset = self.cell_to_offset(r, c);
-                unsafe{ 
+                unsafe{
                     let v = *self.ptr.offset(offset);
                     *m.ptr.offset(offset) = v.is_finite() as u8;
                 }
@@ -1294,7 +1294,7 @@ impl<T:FieldPartial+Float> Matrix<T> {
         for c in 0..self.cols{
             for r in 0..self.rows{
                 let offset = self.cell_to_offset(r, c);
-                unsafe{ 
+                unsafe{
                     let v = *self.ptr.offset(offset);
                     *m.ptr.offset(offset) = v.is_infinite() as u8;
                 }
@@ -1550,7 +1550,7 @@ impl<T:CommutativeMonoidMulPartial> Matrix<T> {
                 let v = *pa.offset(i);
                 let mut result : T = One::one();
                 for _ in 1..n{
-                    result = result * v; 
+                    result = result * v;
                 }
                 *pc.offset(i) = result;
             }
@@ -1602,7 +1602,7 @@ impl<T:MagmaBase> Matrix<T> {
     pub fn print_state(&self){
         let capacity = self.capacity();
         let bytes = capacity * mem::size_of::<T>();
-        println!("Rows: {}, Cols: {}, Capacity: {}, Bytes; {}, Buffer: {:p}, End : {:p}", 
+        println!("Rows: {}, Cols: {}, Capacity: {}, Bytes; {}, Buffer: {:p}, End : {:p}",
             self.rows, self.cols,
             capacity, bytes, self.ptr, unsafe {
                 self.ptr.offset(capacity as isize)
@@ -1660,7 +1660,7 @@ mod test {
     #[test]
     fn test_from_slice_rw0(){
         let  m : MatrixI64 = Matrix::from_slice_rw(3, 3, &[
-            1, 2, 3, 
+            1, 2, 3,
             4, 5, 6,
             7, 8, 9
             ]);
@@ -1745,7 +1745,7 @@ mod test {
     fn test_sub(){
         let m : MatrixI64 = Matrix::ones(4, 2);
         let m3 = &(&m  + &m) + &m;
-        let m2 = &m3 - &m;  
+        let m2 = &m3 - &m;
         let v = vec![2i64, 2, 2, 2, 2, 2, 2, 2];
         assert_eq!(m2.to_std_vec(), v);
     }
@@ -1754,7 +1754,7 @@ mod test {
     fn test_sub_float(){
         let m : MatrixF64 = Matrix::ones(4, 2);
         let m3 = &(&m  + &m) + &m;
-        let m2 = &m3 - &m;  
+        let m2 = &m3 - &m;
         let v = vec![2f64, 2., 2., 2., 2., 2., 2., 2.];
         assert_eq!(m2.to_std_vec(), v);
     }
@@ -1822,14 +1822,14 @@ mod test {
 
     #[test]
     fn test_is_finite(){
-        let v = vec![0f64, Float::nan(), Float::nan(), 
+        let v = vec![0f64, Float::nan(), Float::nan(),
         Float::infinity(), Float::neg_infinity(), 2., 3., 4.];
         let m : MatrixF64 = Matrix::from_slice_cw(2, 4, v.as_slice());
         let f = m.is_finite();
-        assert_eq!(f.to_std_vec(), vec![1, 0, 0, 0, 0, 
+        assert_eq!(f.to_std_vec(), vec![1, 0, 0, 0, 0,
             1, 1, 1]);
         let f = m.is_infinite();
-        assert_eq!(f.to_std_vec(), vec![0, 0, 0, 1, 1, 
+        assert_eq!(f.to_std_vec(), vec![0, 0, 0, 1, 1,
             0, 0, 0]);
     }
 
@@ -1844,7 +1844,7 @@ mod test {
 
     #[test]
     fn test_reshape(){
-        let v = vec![1, 2, 3, 4, 
+        let v = vec![1, 2, 3, 4,
         5, 6, 7, 8,
         9, 10, 11, 12];
         let mut m1 : MatrixI64 = Matrix::from_slice_cw(8, 1, v.as_slice());
@@ -1857,9 +1857,9 @@ mod test {
     fn test_max(){
         // Note the first 4 entries in v form the first column
         // in the matrix.
-        let v = vec![4, 5, 11, 12, 
-        0, 1, 2, 3, 
-        19, 17, 3, 1, 
+        let v = vec![4, 5, 11, 12,
+        0, 1, 2, 3,
+        19, 17, 3, 1,
         7, 8, 5, 6];
         let m : MatrixI64 = Matrix::from_slice_cw(4, 4, v.as_slice());
         let m2 = m.max_row_wise();
@@ -1876,7 +1876,7 @@ mod test {
         assert!(m2.is_vector());
         assert!(m2.is_row());
         assert_eq!(m2.to_std_vec(), vec![12, 3, 19, 8]);
-        
+
 
 
         let m2 = m.min_col_wise();
@@ -1936,7 +1936,7 @@ mod test {
         assert!(m.is_square());
         let m4 = m2.pow(4);
         let m16 = m.copy_mul_scalar(16);
-        assert_eq!(m4, m16); 
+        assert_eq!(m4, m16);
         let m  : MatrixI64 = Matrix::from_iter_cw(2, 2,  0..4);
         assert!(m.is_square());
         let m3 = m.pow(3);
@@ -1994,7 +1994,7 @@ mod test {
 
     #[test]
     fn test_triangular(){
-        let m = matrix_cw_f64(3, 3, &[1., 0., 0., 
+        let m = matrix_cw_f64(3, 3, &[1., 0., 0.,
             4., 5., 0.,
             6., 2., 3.]);
         println!("m: {:?}", m);
@@ -2009,7 +2009,7 @@ mod test {
 
     #[test]
     fn test_trace(){
-        let m = matrix_cw_f64(3, 3, &[1., 0., 0., 
+        let m = matrix_cw_f64(3, 3, &[1., 0., 0.,
             4., 5., 0.,
             6., 2., 3.]);
         println!("{}", m.trace());
@@ -2187,8 +2187,8 @@ mod test {
     #[test]
     fn test_max_abs_scalar_in_row(){
         let m = matrix_rw_i64(3, 3, &[
-            2, 93, 9, 
-            2, 71, -79, 
+            2, 93, 9,
+            2, 71, -79,
             -83, 62, 6]);
         assert_eq!(m.max_abs_scalar_in_row(0, 0, 3), (93, 1));
         assert_eq!(m.max_abs_scalar_in_row(1, 0, 3), (79, 2));
@@ -2200,8 +2200,8 @@ mod test {
     #[test]
     fn test_max_abs_scalar_in_col(){
         let m = matrix_cw_i64(3, 3, &[
-            2, 93, 9, 
-            2, 71, -79, 
+            2, 93, 9,
+            2, 71, -79,
             -83, 62, 6]);
         assert_eq!(m.max_abs_scalar_in_col(0, 0, 3), (93, 1));
         assert_eq!(m.max_abs_scalar_in_col(1, 0, 3), (79, 2));
@@ -2213,7 +2213,7 @@ mod test {
     #[test]
     fn test_permute_rows(){
         let m = matrix_rw_i64(4, 3, &[
-            1, 2, 3, 
+            1, 2, 3,
             4, 5, 6,
             7, 8, 9,
             10, 11, 12
@@ -2221,7 +2221,7 @@ mod test {
         let permutation = vector_u16(&[0, 3, 1, 2]);
         let m = m.permuted_rows(&permutation);
         let m2 = matrix_rw_i64(4, 3, &[
-            1, 2, 3, 
+            1, 2, 3,
             10, 11, 12,
             4, 5, 6,
             7, 8, 9,
@@ -2232,7 +2232,7 @@ mod test {
     #[test]
     fn test_permute_cols(){
         let m = matrix_rw_i64(4, 3, &[
-            1, 2, 3, 
+            1, 2, 3,
             4, 5, 6,
             7, 8, 9,
             10, 11, 12
