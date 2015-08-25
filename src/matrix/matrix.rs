@@ -1523,6 +1523,14 @@ impl<T:CommutativeMonoidAddPartial+ops::Sub<Output=T>> Matrix<T> {
         result
     }
 }
+
+impl<T: MagmaBase> Matrix<T> {
+    pub fn map<B, F>(&self, f: F) -> Matrix<B>
+    where F: Fn(T) -> B, B: MagmaBase {
+        Matrix::from_iter_cw(self.num_rows(), self.num_cols(), self.cell_iter().map(f))
+    }
+}
+
 impl<T:CommutativeMonoidMulPartial> Matrix<T> {
     /// Multiplies matrices element by element
     pub fn mul_elt(&self, rhs: &Matrix<T>) -> Matrix<T> {
