@@ -30,9 +30,9 @@ pub use matrix::extract::traits::{Extraction};
 
 #[doc="Defines the features which all matrix types must implement.
 This API focuses only on the shape of the matrix.
-"] 
+"]
 pub trait Shape<T:MagmaBase> {
-    
+
     /// Returns the number of rows
     fn num_rows(&self) -> usize;
 
@@ -42,8 +42,8 @@ pub trait Shape<T:MagmaBase> {
 
     /// Returns the size in an (r, c) tuple
     fn size (&self)-> (usize, usize);
- 
- 
+
+
      /// Returns the number of cells in matrix
     fn num_cells(&self)->usize;
 
@@ -65,7 +65,7 @@ pub trait Shape<T:MagmaBase> {
     /// Indicates if the matrix is a vector
     fn is_vector(&self) -> bool {
         (self.num_rows() == 1) ^ (self.num_cols() == 1)
-    } 
+    }
 
     /// Indicates if the matrix is empty
     fn is_empty(&self) -> bool {
@@ -130,7 +130,7 @@ pub trait Shape<T:MagmaBase> {
 
 #[doc=" Defines the low level interface to the internal
 memory buffer of a matrix implementation.  Use it with
-caution. 
+caution.
 "]
 pub trait MatrixBuffer<T:MagmaBase> {
 
@@ -153,11 +153,11 @@ pub trait MatrixBuffer<T:MagmaBase> {
 
 #[doc="A matrix structure whose storage is in terms
 of columns with a fixed number of storage elements
-per column given by its stride. 
+per column given by its stride.
 "]
 pub trait Strided {
 
-    /// Returns the number of actual memory elements 
+    /// Returns the number of actual memory elements
     /// per column
     fn stride (&self)->usize;
 
@@ -167,17 +167,17 @@ pub trait Strided {
 
 /// Defines a set of basic methods implemented by matrices of numbers
 pub trait NumberMatrix<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> : Shape<T> + MatrixBuffer<T>{
-    
+
     /// Returns if the matrix is an identity matrix
     fn is_identity(&self) -> bool;
 
     /// Returns if the matrix is a diagonal matrix
     fn is_diagonal(&self) -> bool;
 
-    /// Returns if the matrix is lower triangular 
+    /// Returns if the matrix is lower triangular
     fn is_lt(&self) -> bool;
 
-    /// Returns if the matrix is upper triangular 
+    /// Returns if the matrix is upper triangular
     fn is_ut(&self) -> bool;
 
 
@@ -194,18 +194,18 @@ pub trait NumberMatrix<T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial
 }
 
 /// A matrix which is both a number matrix and is strided.
-pub trait StridedNumberMatrix<T:FieldPartial> : 
+pub trait StridedNumberMatrix<T:FieldPartial> :
 NumberMatrix<T>+Strided{
 
 }
 
 #[doc=" These methods help in run time to query
 about the properties of the type which is implementing
-the trait. 
+the trait.
 
 As an example, this API helps us decide if an object
-of type Shape is a real matrix or a view 
-extracted from a matrix. 
+of type Shape is a real matrix or a view
+extracted from a matrix.
 
 An implementing type needs to implement
 only few of the methods below. For rest, it can
@@ -236,10 +236,10 @@ pub trait Conversion<T:MagmaBase> : Shape<T> {
     /// Converts the matrix to vector from standard library
     fn to_std_vec(&self) -> Vec<T>;
 
-    /// Converts the matrix to a scalar 
+    /// Converts the matrix to a scalar
     fn to_scalar(&self) -> T {
         if !self.is_scalar() {
-            panic! (SRError::DimensionsMismatch.to_string());
+            panic! (SRError::DimensionsMismatch{a: self.size(), b: (1,1)}.to_string());
         }
         unsafe { self.get_unchecked(0, 0)}
     }
@@ -282,9 +282,9 @@ pub trait Search<T:MagmaBase+Signed+PartialOrd> : Shape<T>+MatrixBuffer<T> + Str
 
     /// Returns the largest entry (by magnitude) in the row between
     /// [start, end) columns
-    fn max_abs_scalar_in_row(&self, 
-        row : usize, 
-        start_col: usize, 
+    fn max_abs_scalar_in_row(&self,
+        row : usize,
+        start_col: usize,
         end_col : usize)-> (T, usize){
         debug_assert!(row < self.num_rows());
         debug_assert!(end_col <= self.num_cols());
@@ -307,9 +307,9 @@ pub trait Search<T:MagmaBase+Signed+PartialOrd> : Shape<T>+MatrixBuffer<T> + Str
 
     /// Returns the largest entry (by magnitude) in the column between
     /// [start, end) rows
-    fn max_abs_scalar_in_col(&self, 
-        col : usize, 
-        start_row: usize, 
+    fn max_abs_scalar_in_col(&self,
+        col : usize,
+        start_row: usize,
         end_row : usize)-> (T, usize){
         debug_assert!(end_row <= self.num_rows());
         debug_assert!(col < self.num_cols());
@@ -350,7 +350,7 @@ pub trait SignedMatrix {
 
 
 /// A strided buffer matrix of floats
-pub trait StridedFloatMatrix <T:FieldPartial+Float> 
+pub trait StridedFloatMatrix <T:FieldPartial+Float>
     : StridedNumberMatrix<T> {
 
 }

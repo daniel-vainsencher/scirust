@@ -23,7 +23,7 @@ pub enum SRError{
     /// The matrix is empty
     EmptyMatrix,
     /// The dimensions of two matrices mismatch
-    DimensionsMismatch,
+    DimensionsMismatch {a: (usize, usize), b: (usize, usize)},
     /// Number of rows don't match
     RowsMismatch,
     /// Number of columns don't match
@@ -102,7 +102,7 @@ impl SRError{
         match *self{
             //  Matrices
             SRError::EmptyMatrix => format!("Matrix is empty"),
-            SRError::DimensionsMismatch => format!("Dimensions don't match"),
+            SRError::DimensionsMismatch {a, b} => format!("Dimensions ({} x {}) and ({} x {}) don't match", a.0, a.1, b.0, b.1),
             SRError::RowsMismatch => format!("Number of rows don't match"),
             SRError::ColsMismatch => format!("Number of columns don't match"),
             SRError::IsNotSquareMatrix => format!("Matrix is not square"),

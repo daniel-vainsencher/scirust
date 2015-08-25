@@ -195,7 +195,7 @@ const BLOCK_SIZE:usize = 16;
     use std::ops::Add;
     // Validate dimensions match for multiplication
     if lhs.num_cols() != rhs.num_rows(){
-        return Err(SRError::DimensionsMismatch);
+        return Err(SRError::DimensionsMismatch{a: lhs.size(), b: rhs.size()});
     }
     let mut result : Matrix<T> = Matrix::new(lhs.num_rows(), rhs.num_cols());
     let zero : T = Zero::zero();
@@ -261,7 +261,7 @@ const BLOCK_SIZE:usize = 16;
     rhs: &Matrix<T>)->SRResult<Matrix<T>>{
     // Validate dimensions match for multiplication
     if lhs.num_cols() != rhs.num_rows(){
-        return Err(SRError::DimensionsMismatch);
+        return Err(SRError::DimensionsMismatch{a: lhs.size(), b: rhs.size()});
     }
     let mut result : Matrix<T> = Matrix::new(lhs.num_rows(), rhs.num_cols());
     let pa = lhs.as_ptr();
@@ -302,7 +302,7 @@ pub fn multiply_transpose_simple<T:CommutativeMonoidAddPartial+CommutativeMonoid
     rhs: &Matrix<T>)->SRResult<Matrix<T>>{
     // Validate dimensions match for multiplication
     if lhs.num_rows() != rhs.num_rows(){
-        return Err(SRError::DimensionsMismatch);
+        return Err(SRError::DimensionsMismatch{a: lhs.size(), b: rhs.size()});
     }
     let mut result : Matrix<T> = Matrix::new(lhs.num_cols(), rhs.num_cols());
     let pa = lhs.as_ptr();
@@ -349,7 +349,7 @@ impl<'a, 'b, T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> ops::Mul
         };
         match result {
             Ok(m) => m,
-            Err(e) => panic!(format!("{}, multiplying matrices of sizes: {:?}, {:?}", e.to_string(), self.size(), rhs.size()))
+            Err(e) => panic!(e.to_string())
         }
     }
 }

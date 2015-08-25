@@ -13,19 +13,19 @@ use num::traits::{Zero, One};
 use algebra::structure::{MagmaBase, CommutativeMonoidAddPartial, FieldPartial};
 use error::SRError;
 use matrix::matrix::{Matrix};
-use matrix::traits::{Shape, NumberMatrix, 
+use matrix::traits::{Shape, NumberMatrix,
     Strided,
     StridedNumberMatrix,
     StridedFloatMatrix,
-    Introspection, 
+    Introspection,
     MatrixBuffer};
 
 //use discrete::*;
 
 #[doc = "
-Defines a view on a matrix. 
+Defines a view on a matrix.
 
-A view on a matrix is a subset of 
+A view on a matrix is a subset of
 chosen rows and columns.
 
 
@@ -36,10 +36,10 @@ pub struct MatrixView<'a, T:'a+MagmaBase>{
     // start row
     start_row : usize,
     // number or rows
-    rows  : usize, 
+    rows  : usize,
     // start column
     start_col : usize,
-    // Number of columns 
+    // Number of columns
     cols : usize,
 }
 
@@ -52,7 +52,7 @@ impl<'a, T:MagmaBase> MatrixView<'a, T> {
         let result : MatrixView<T> = MatrixView{
             m : m,
             start_row : start_row,
-            start_col : start_col, 
+            start_col : start_col,
             rows: num_rows,
             cols : num_cols
         };
@@ -67,13 +67,13 @@ impl<'a, T:MagmaBase> MatrixView<'a, T> {
     #[inline]
     pub fn start_row(&self) -> usize{
         self.start_row
-    } 
+    }
     /// Returns the start column
     #[inline]
     pub fn start_col(&self) -> usize{
         self.start_col
     }
-    /// Returns the underlying matrix reference 
+    /// Returns the underlying matrix reference
     #[inline]
     pub fn matrix(&self)-> &'a Matrix<T>{
         self.m
@@ -89,8 +89,8 @@ impl<'a, T:FieldPartial> MatrixView<'a, T> {
     pub fn copy_from(&mut self, rhs: &MatrixView<T>){
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
-        }        
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
+        }
         let pd : *mut T = unsafe { mem::transmute(self.m.as_ptr()) };
         let ps = rhs.m.as_ptr();
         for c in 0..self.cols{
@@ -109,8 +109,8 @@ impl<'a, T:FieldPartial> MatrixView<'a, T> {
     pub fn copy_scaled_from(&mut self, rhs: &MatrixView<T>, scale: T){
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
-        }        
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
+        }
         let pd : *mut T = unsafe { mem::transmute(self.m.as_ptr()) };
         let ps = rhs.m.as_ptr();
         for c in 0..self.cols{
@@ -133,9 +133,9 @@ impl<'a, T:FieldPartial> MatrixView<'a, T> {
 
 }
 
-/// Strided buffer 
+/// Strided buffer
 impl <'a, T:MagmaBase> Strided for MatrixView<'a, T> {
-    /// Returns the number of actual memory elements 
+    /// Returns the number of actual memory elements
     /// per column stored in the memory
     fn stride (&self)->usize {
         self.matrix().stride()
@@ -145,7 +145,7 @@ impl <'a, T:MagmaBase> Strided for MatrixView<'a, T> {
 /// Implement Buffer API for matrix view
 impl <'a, T:MagmaBase> MatrixBuffer<T> for MatrixView<'a, T> {
 
-    /// Returns an unsafe pointer to the matrix's 
+    /// Returns an unsafe pointer to the matrix's
     /// buffer.
     #[inline]
     fn as_ptr(&self)-> *const T{
@@ -167,7 +167,7 @@ impl <'a, T:MagmaBase> MatrixBuffer<T> for MatrixView<'a, T> {
         let r = self.start_row + r;
         let c = self.start_col + c;
         (c * self.m.stride() + r) as isize
-    } 
+    }
 
     /// Returns the offset of the first cell in the buffer
     #[inline]
@@ -252,7 +252,7 @@ impl <'a, T:FieldPartial> NumberMatrix<T> for MatrixView<'a, T> {
                 }
 
             }
-        } 
+        }
         true
     }
 
@@ -270,11 +270,11 @@ impl <'a, T:FieldPartial> NumberMatrix<T> for MatrixView<'a, T> {
                     }
                 }
             }
-        } 
+        }
         true
     }
 
-    /// Returns if the matrix is lower triangular 
+    /// Returns if the matrix is lower triangular
     fn is_lt(&self) -> bool {
         let z  : T = Zero::zero();
         let ptr = self.m.as_ptr();
@@ -286,11 +286,11 @@ impl <'a, T:FieldPartial> NumberMatrix<T> for MatrixView<'a, T> {
                     return false;
                 }
             }
-        } 
+        }
         true
     }
 
-    /// Returns if the matrix is upper triangular 
+    /// Returns if the matrix is upper triangular
     fn is_ut(&self) -> bool {
         let z  : T = Zero::zero();
         let ptr = self.m.as_ptr();
@@ -303,7 +303,7 @@ impl <'a, T:FieldPartial> NumberMatrix<T> for MatrixView<'a, T> {
                     return false;
                 }
             }
-        } 
+        }
         true
     }
 
@@ -399,7 +399,7 @@ impl<'a, T:CommutativeMonoidAddPartial+PartialOrd> MatrixView<'a, T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)};
-                if s < v { 
+                if s < v {
                     v = s;
                     rr = r;
                     cc = c;
@@ -423,7 +423,7 @@ impl<'a, T:CommutativeMonoidAddPartial+PartialOrd> MatrixView<'a, T> {
             for r in 0..self.rows{
                 let src_offset = self.cell_to_offset(r, c);
                 let s = unsafe{*ps.offset(src_offset)};
-                if s > v { 
+                if s > v {
                     v = s;
                     rr = r;
                     cc = c;
@@ -431,17 +431,17 @@ impl<'a, T:CommutativeMonoidAddPartial+PartialOrd> MatrixView<'a, T> {
             }
         }
         (v, rr, cc)
-    }    
+    }
     /// Returns the minimum scalar value
     pub fn min_scalar_value(&self) -> T{
         let (v , _, _) = self.min_scalar();
         v
-    }    
+    }
     /// Returns the maximum scalar value
     pub fn max_scalar_value(&self) -> T{
         let (v , _, _) = self.max_scalar();
         v
-    }    
+    }
 
 }
 
@@ -452,7 +452,7 @@ impl<'a, 'b, 'c, 'd, T:CommutativeMonoidAddPartial> ops::Add<&'b MatrixView<'d, 
     fn add(self, rhs: &'b MatrixView<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let mut result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.m.as_ptr();
@@ -575,7 +575,7 @@ mod test{
         let vrows = 4;
         let vcols = 3;
         let mv = m.view(1, 1, vrows, vcols);
-        let vv : Vec<i64> = vec![12, 13, 14, 15, 
+        let vv : Vec<i64> = vec![12, 13, 14, 15,
         22, 23, 24, 25,
         32, 33, 34, 35];
         assert_eq!(mv.to_std_vec(), vv);
@@ -586,7 +586,7 @@ mod test{
         let m :  MatrixI64 = Matrix::from_iter_cw(10, 10, (1..200));
         let v1   = m.view(2, 2, 2, 2); // 23 , 24 , 33, 34
         let v2 = m.view(1, 1, 2, 2);  // 12, 13, 22, 33
-        let m2 = &v1 + &v2; // 
+        let m2 = &v1 + &v2; //
         let m3 : MatrixI64 = Matrix::from_slice_cw(2, 2, vec![35, 37, 55, 57].as_slice());
         assert_eq!(m2, m3);
     }
@@ -673,7 +673,7 @@ mod test{
 
     #[test]
     fn test_trace(){
-        let m = matrix_cw_f64(3, 3, &[1., 0., 0., 
+        let m = matrix_cw_f64(3, 3, &[1., 0., 0.,
             4., 5., 0.,
             6., 2., 3.]);
         let v = m.view(0, 0, 2, 2);
@@ -683,4 +683,3 @@ mod test{
         assert_eq!(v.trace(), 8.);
     }
 }
-

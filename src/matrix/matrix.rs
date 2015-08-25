@@ -1407,14 +1407,14 @@ impl <T:MagmaBase> fmt::Display for Matrix<T> {
     }
 }
 
-
+use error::SRError::*;
 /// Matrix addition support
 impl<'a, 'b, T:CommutativeMonoidAddPartial> ops::Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn add(self, rhs: &'b Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
@@ -1438,7 +1438,7 @@ impl<'a, 'b, T:QuasiGroupAddPartial> ops::Sub<&'b Matrix<T>> for &'a Matrix<T>{
     fn sub(self, rhs: &'b Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
@@ -1484,7 +1484,7 @@ impl<T:CommutativeMonoidAddPartial> Matrix<T> {
     pub fn add_elt(&self, rhs: &Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
@@ -1506,7 +1506,7 @@ impl<T:CommutativeMonoidAddPartial+ops::Sub<Output=T>> Matrix<T> {
     pub fn sub_elt(&self, rhs: &Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
@@ -1535,7 +1535,7 @@ impl<T:CommutativeMonoidMulPartial> Matrix<T> {
     pub fn mul_elt(&self, rhs: &Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
@@ -1596,7 +1596,7 @@ impl<T:CommutativeMonoidMulPartial+ops::Div<Output=T>> Matrix<T> {
     pub fn div_elt(&self, rhs: &Matrix<T>) -> Matrix<T> {
         // Validate dimensions are same.
         if self.size() != rhs.size(){
-            panic!(SRError::DimensionsMismatch.to_string());
+            panic!(SRError::DimensionsMismatch{a: self.size(), b: rhs.size()}.to_string());
         }
         let result : Matrix<T> = Matrix::new(self.rows, self.cols);
         let pa = self.ptr;
