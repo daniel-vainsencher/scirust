@@ -76,7 +76,7 @@ pub fn transpose_simple<T:MagmaBase>(src: & Matrix<T>)->Matrix <T>{
 
 
 /// Block wise transpose
-/// This is more efficient than simple transpose for large matrices 
+/// This is more efficient than simple transpose for large matrices
 /// due to caching considerations
 pub fn transpose_block<T:MagmaBase>(src: & Matrix<T>)->Matrix <T>{
     // Choose a block size
@@ -349,7 +349,7 @@ impl<'a, 'b, T:CommutativeMonoidAddPartial+CommutativeMonoidMulPartial> ops::Mul
         };
         match result {
             Ok(m) => m,
-            Err(e) => panic!(e.to_string())
+            Err(e) => panic!(format!("{}, multiplying matrices of sizes: {:?}, {:?}", e.to_string(), self.size(), rhs.size()))
         }
     }
 }

@@ -1192,7 +1192,6 @@ impl<T:CommutativeMonoidAddPartial+PartialOrd> Matrix<T> {
 }
 
 impl<T:MagmaBase+Signed+PartialOrd> Matrix<T> {
-
     // Returns the absolute minimum scalar value
     pub fn min_abs_scalar(&self) -> (T, usize, usize){
         if self.is_empty(){
