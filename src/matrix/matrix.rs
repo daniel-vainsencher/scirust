@@ -1122,7 +1122,7 @@ impl<T:MagmaBase> Matrix<T> {
         let result : MatrixView<T> = MatrixView::new(self, start_row, start_col, num_rows, num_cols);
         result
     }
-    pub fn submatrix(&self, rows: Vec<usize>, cols: Vec<usize>) -> Matrix<T> {
+    pub fn submatrix(&self, rows: &Vec<usize>, cols: &Vec<usize>) -> Matrix<T> {
         let mut res = Matrix::<T>::new(rows.len(), cols.len());
         for c in 0..res.num_cols() {
             for r in 0..res.num_rows() {
